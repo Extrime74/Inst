@@ -38,7 +38,7 @@ def start(start_message):
             def photo_to_feed(photo_to_message):
 
                 if photo_to_message.text == 'Выложить фото в ленту':
-                    bot.send_photo('-1001660390862', fileid)
+                    bot.send_photo('your_tg_chat', fileid)
                     status = fu.photo_upload_feed()
                     if status == 'OK':
                         bot.reply_to(photo_to_message, 'Запостил.')
@@ -46,7 +46,7 @@ def start(start_message):
                         bot.reply_to(photo_to_message, 'Что-то пошло не так.')
 
                 if photo_to_message.text == 'Выложить фото в сторис':
-                    bot.send_photo('-1001660390862', fileid)
+                    bot.send_photo('your_tg_chat', fileid)
                     status = fu.photo_upload_story()
                     if status == 'OK':
                         bot.reply_to(photo_to_message, 'Запостил.')
@@ -72,7 +72,7 @@ def start(start_message):
                     downloaded_file = bot.download_file(file_info.file_path)
                     with open('video.mp4', 'wb') as new_file:
                         new_file.write(downloaded_file)
-                    bot.send_video('-1001660390862', fileid)
+                    bot.send_video('your_tg_chat', fileid)
                     status = fu.video_upload_feed()
                     if status == 'OK':
                         bot.reply_to(video_to_message, 'Запостил.')
@@ -86,7 +86,7 @@ def start(start_message):
                     downloaded_file = bot.download_file(file_info.file_path)
                     with open('video.mp4', 'wb') as new_file:
                         new_file.write(downloaded_file)
-                    bot.send_video('-1001660390862', fileid)
+                    bot.send_video('your_tg_chat', fileid)
                     status = fu.video_upload_story()
                     if status == 'OK':
                         bot.reply_to(video_to_message, 'Запостил.')
