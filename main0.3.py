@@ -52,44 +52,6 @@ def start(start_message):
                         bot.reply_to(photo_to_message, 'Запостил.')
                     else:
                         bot.reply_to(photo_to_message, 'Что-то пошло не так.')
-        # def photo(photo_message):
-        #
-        #     photo_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        #     photo_btn1 = types.KeyboardButton('Выложить фото в ленту')
-        #     photo_btn2 = types.KeyboardButton('Выложить фото в сторис')
-        #     photo_markup.add(photo_btn1, photo_btn2)
-        #     bot.send_message(photo_message.from_user.id, 'Куда выложить фото❓', reply_markup=photo_markup)
-        #
-        #     @bot.message_handler(content_types=['text'])
-        #     def photo_to_feed(photo_to_message):
-        #
-        #         if photo_to_message.text == 'Выложить фото в ленту':
-        #             fu.photo_cleanup()
-        #             fileid = photo_message.photo[-1].file_id
-        #             file_info = bot.get_file(fileid)
-        #             downloaded_file = bot.download_file(file_info.file_path)
-        #             with open('image.jpg', 'wb') as new_file:
-        #                 new_file.write(downloaded_file)
-        #             bot.send_photo('-1001660390862', fileid)
-        #             status = fu.photo_upload_feed()
-        #             if status == 'OK':
-        #                 bot.reply_to(photo_to_message, 'Запостил.')
-        #             if status == 'Not OK':
-        #                 bot.reply_to(photo_to_message, 'Что-то пошло не так.')
-        #
-        #         if photo_to_message.text == 'Выложить фото в сторис':
-        #             fu.photo_cleanup()
-        #             fileid = photo_message.photo[-1].file_id
-        #             file_info = bot.get_file(fileid)
-        #             downloaded_file = bot.download_file(file_info.file_path)
-        #             with open('image.jpg', 'wb') as new_file:
-        #                 new_file.write(downloaded_file)
-        #             bot.send_photo('-1001660390862', fileid)
-        #             status = fu.photo_upload_story()
-        #             if status == 'OK':
-        #                 bot.reply_to(photo_to_message, 'Запостил.')
-        #             if status == 'Not OK':
-        #                 bot.reply_to(photo_to_message, 'Что-то пошло не так.')
 
         @bot.message_handler(content_types=['video'])
         def video(video_message):
