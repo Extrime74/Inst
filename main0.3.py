@@ -98,29 +98,3 @@ def start(start_message):
 
 
 bot.polling(none_stop=True, interval=0)
-
-
-# @bot.message_handler(content_types=['text'])
-# def get_text_messages(message):
-#     if message.text == 'Поздороваться 👋 ':
-#         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)  # создание новых кнопок
-#         btn1 = types.KeyboardButton('Выложить фото в ленту')
-#         btn2 = types.KeyboardButton('Выложить фото в сторис')
-#         btn3 = types.KeyboardButton('Выложить видео в ленту')
-#         btn4 = types.KeyboardButton('Выложить видео в сторис')
-#         btn5 = types.KeyboardButton('Выложить видео в Reels')
-#         markup.add(btn1, btn2, btn3, btn4, btn5)
-#         bot.send_message(message.from_user.id, 'Что ты хочешь сделать❓', reply_markup=markup)
-
-# @bot.message_handler(content_types=['photo'])
-# def photo(message):
-#     fu.photo_cleanup()
-#     bot.send_message(message.chat.id, 'Ты отправил мне фото')
-#     fileid = message.photo[-1].file_id
-#     file_info = bot.get_file(fileid)
-#     downloaded_file = bot.download_file(file_info.file_path)
-#     with open('image.jpg', 'wb') as new_file:
-#         new_file.write(downloaded_file)
-#     bot.send_photo('-1001660390862', fileid)
-#     fu.photo_upload()
-#     bot.reply_to(message, "Запостил")
