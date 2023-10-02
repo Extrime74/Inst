@@ -6,3 +6,4 @@ cl = Client()
 cl.login(config.USERNAME, config.PASSWORD)
 cl.delay_range = [1, 3]
 cl.dump_settings('session.json')
+print('Done')
