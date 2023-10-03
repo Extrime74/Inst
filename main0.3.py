@@ -1,100 +1,123 @@
-from telebot import types
-import function
 import telebot
+from telebot import types
 import config
+import function
 
 
-bot = telebot.TeleBot(config.TOKEN)
-fu = function
+class PostingBot:
+    def __init__(self):
+        self.downloaded_file = None
+        self.fileid = None
+        self.token = config.TOKEN
+        self.bot = telebot.TeleBot(self.token)
 
-fu.inst_login()
+        @self.bot.message_handler(commands=['start'])
+        def start_command(message):
+            if message.chat.id == config.MY_USER_ID:
+                function.login_user()
+                self.bot.send_message(message.from_user.id, f'👋 Привет, {message.from_user.first_name}!'
+                                                            f'\nПоделись со мной фото или видео и я загружу их '
+                                                            f'в твой инстаграм!')
 
+                @self.bot.message_handler(content_types=['photo'])
+                def photo(photo_message):
 
-@bot.message_handler(commands=['start'])
-def start(start_message):
+                    function.photo_cleanup()
+                    self.fileid = photo_message.photo[-1].file_id
+                    self.file_info = self.bot.get_file(self.fileid)
+                    self.downloaded_file = self.bot.download_file(self.file_info.file_path)
+                    with open("image.jpg", 'wb') as new_file:
+                        new_file.write(self.downloaded_file)
 
-    if start_message.chat.id == config.MY_USER_ID:
-        bot.send_message(start_message.from_user.id,
-                         f'👋 Привет, {start_message.from_user.first_name}!'
-                         f'\nПоделись со мной фото или видео и я загружу их в твой инстаграм!')
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    btn1 = types.KeyboardButton('Выложить фото в ленту')
+                    btn2 = types.KeyboardButton('Выложить фото в сторис')
+                    btn3 = types.KeyboardButton('Сохранить в хранилище')
+                    markup.add(btn1, btn2, btn3)
+                    self.bot.send_message(photo_message.from_user.id, 'Куда выложить фото❓', reply_markup=markup)
+                    self.bot.register_next_step_handler(photo_message, photo_text)
 
-        @bot.message_handler(content_types=['photo'])
-        def photo(photo_message):
+                @self.bot.message_handler(content_types=['text'])
+                def photo_text(photo_text_message):
 
-            photo_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            photo_btn1 = types.KeyboardButton('Выложить фото в ленту')
-            photo_btn2 = types.KeyboardButton('Выложить фото в сторис')
-            photo_markup.add(photo_btn1, photo_btn2)
-            bot.send_message(photo_message.from_user.id, 'Куда выложить фото❓', reply_markup=photo_markup)
+                    if photo_text_message.text == 'Выложить фото в ленту':
+                        self.bot.send_photo('-1001660390862', self.fileid)
+                        status = function.photo_upload_feed()
+                        if status == 'OK':
+                            self.bot.reply_to(photo_text_message, 'Запостил')
+                        else:
+                            self.bot.reply_to(photo_text_message, 'Что-то пошло не так.')
 
-            fu.photo_cleanup()
-            fileid = photo_message.photo[-1].file_id
-            file_info = bot.get_file(fileid)
-            downloaded_file = bot.download_file(file_info.file_path)
-            with open("image.jpg", 'wb') as new_file:
-                new_file.write(downloaded_file)
+                    if photo_text_message.text == 'Выложить фото в сторис':
+                        self.bot.send_photo('-1001660390862', self.fileid)
+                        status = function.photo_upload_story()
+                        if status == 'OK':
+                            self.bot.reply_to(photo_text_message, 'Запостил')
+                        else:
+                            self.bot.reply_to(photo_text_message, 'Что-то пошло не так.')
 
-            @bot.message_handler(content_types=['text'])
-            def photo_to_feed(photo_to_message):
+                    if photo_text_message.text == 'Сохранить в хранилище':
+                        from pathlib import Path
+                        Path(f'Download/').mkdir(parents=True, exist_ok=True)
+                        src = f'Download/Photo/' + str(photo_text_message.date) + '.jpg'
+                        with open(src, 'wb') as new_file:
+                            new_file.write(self.downloaded_file)
+                        self.bot.reply_to(photo_text_message, 'Сохранил')
 
-                if photo_to_message.text == 'Выложить фото в ленту':
-                    bot.send_photo('your_tg_chat', fileid)
-                    status = fu.photo_upload_feed()
-                    if status == 'OK':
-                        bot.reply_to(photo_to_message, 'Запостил.')
-                    else:
-                        bot.reply_to(photo_to_message, 'Что-то пошло не так.')
+                @self.bot.message_handler(content_types=['video'])
+                def video(video_message):
 
-                if photo_to_message.text == 'Выложить фото в сторис':
-                    bot.send_photo('your_tg_chat', fileid)
-                    status = fu.photo_upload_story()
-                    if status == 'OK':
-                        bot.reply_to(photo_to_message, 'Запостил.')
-                    else:
-                        bot.reply_to(photo_to_message, 'Что-то пошло не так.')
-
-        @bot.message_handler(content_types=['video'])
-        def video(video_message):
-
-            video_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            video_btn1 = types.KeyboardButton('Выложить видео в ленту')
-            video_btn2 = types.KeyboardButton('Выложить видео в сторис')
-            video_markup.add(video_btn1, video_btn2)
-            bot.send_message(video_message.from_user.id, 'Куда выложить видео❓', reply_markup=video_markup)
-
-            @bot.message_handler(content_types=['text'])
-            def video_to_feed(video_to_message):
-
-                if video_to_message.text == 'Выложить видео в ленту':
-                    fu.video_cleanup()
-                    fileid = video_message.video.file_id
-                    file_info = bot.get_file(fileid)
-                    downloaded_file = bot.download_file(file_info.file_path)
+                    function.video_cleanup()
+                    self.fileid = video_message.video.file_id
+                    self.file_info = self.bot.get_file(self.fileid)
+                    self.downloaded_file = self.bot.download_file(self.file_info.file_path)
                     with open('video.mp4', 'wb') as new_file:
-                        new_file.write(downloaded_file)
-                    bot.send_video('your_tg_chat', fileid)
-                    status = fu.video_upload_feed()
-                    if status == 'OK':
-                        bot.reply_to(video_to_message, 'Запостил.')
-                    else:
-                        bot.reply_to(video_to_message, 'Что-то пошло не так.\nВозможно, видео слишком длинное.')
+                        new_file.write(self.downloaded_file)
 
-                if video_to_message.text == 'Выложить видео в сторис':
-                    fu.video_cleanup()
-                    fileid = video_message.video.file_id
-                    file_info = bot.get_file(fileid)
-                    downloaded_file = bot.download_file(file_info.file_path)
-                    with open('video.mp4', 'wb') as new_file:
-                        new_file.write(downloaded_file)
-                    bot.send_video('your_tg_chat', fileid)
-                    status = fu.video_upload_story()
-                    if status == 'OK':
-                        bot.reply_to(video_to_message, 'Запостил.')
-                    else:
-                        bot.reply_to(video_to_message, 'Что-то пошло не так.\nВозможно, видео слишком длинное.')
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    btn1 = types.KeyboardButton('Выложить видео в ленту')
+                    btn2 = types.KeyboardButton('Выложить видео в сторис')
+                    btn3 = types.KeyboardButton('Сохранить в хранилище')
+                    markup.add(btn1, btn2, btn3)
+                    self.bot.send_message(video_message.from_user.id, 'Куда выложить видео❓', reply_markup=markup)
+                    self.bot.register_next_step_handler(video_message, video_text)
 
-    else:
-        bot.reply_to(start_message, 'Сорян, этот бот приватный!')
+                @self.bot.message_handler(content_types=['text'])
+                def video_text(video_text_message):
+
+                    if video_text_message.text == 'Выложить видео в ленту':
+                        self.bot.send_video('-1001660390862', self.fileid)
+                        status = function.video_upload_feed()
+                        if status == 'OK':
+                            self.bot.reply_to(video_text_message, 'Запостил.')
+                        else:
+                            self.bot.reply_to(video_text_message, 'Что-то пошло не так.'
+                                                                  '\nВозможно, видео слишком длинное.')
+
+                    if video_text_message.text == 'Выложить видео в сторис':
+                        self.bot.send_video('-1001660390862', self.fileid)
+                        status = function.video_upload_story()
+                        if status == 'OK':
+                            self.bot.reply_to(video_text_message, 'Запостил.')
+                        else:
+                            self.bot.reply_to(video_text_message, 'Что-то пошло не так.'
+                                                                  '\nВозможно, видео слишком длинное.')
+
+                    if video_text_message.text == 'Сохранить в хранилище':
+                        from pathlib import Path
+                        Path(f'Download/').mkdir(parents=True, exist_ok=True)
+                        src = f'Download/Video/' + str(video_text_message.date) + '.mp4'
+                        with open(src, 'wb') as new_file:
+                            new_file.write(self.downloaded_file)
+                        self.bot.reply_to(video_text_message, 'Сохранил')
+
+            else:
+                self.bot.reply_to(message, 'Сорян, этот бот приватный!')
+
+    def run(self):
+        self.bot.polling()
 
 
-bot.polling(none_stop=True, interval=0)
+if __name__ == '__main__':
+    Tele = PostingBot()
+    Tele.run()
