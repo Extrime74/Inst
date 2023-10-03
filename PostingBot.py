@@ -11,6 +11,8 @@ class PostingBot:
         self.token = config.TOKEN
         self.bot = telebot.TeleBot(self.token)
 
+        print('Запусти бота в Telegram')
+
         @self.bot.message_handler(commands=['start'])
         def start_command(message):
             if message.chat.id == config.MY_USER_ID:
@@ -18,6 +20,10 @@ class PostingBot:
                 self.bot.send_message(message.from_user.id, f'👋 Привет, {message.from_user.first_name}!'
                                                             f'\nПоделись со мной фото или видео и я загружу их '
                                                             f'в твой инстаграм!')
+
+                @self.bot.message_handler(commands=['ping'])
+                def ping(ping_message):
+                    self.bot.send_message(ping_message.from_user.id, 'Я тут')
 
                 @self.bot.message_handler(content_types=['photo'])
                 def photo(photo_message):
