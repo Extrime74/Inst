@@ -1,11 +1,12 @@
 import telebot
 from telebot import types
-from pathlib import Path
 import config
 import function
+from pathlib import Path
 
 Path(f'Download/Photo/').mkdir(parents=True, exist_ok=True)
 Path(f'Download/Video/').mkdir(parents=True, exist_ok=True)
+
 
 class PostingBot:
     def __init__(self):
@@ -13,20 +14,45 @@ class PostingBot:
         self.fileid = None
         self.token = config.TOKEN
         self.bot = telebot.TeleBot(self.token)
+        r = types.ReplyKeyboardRemove()
 
         print('Запусти бота в Telegram')
 
         @self.bot.message_handler(commands=['start'])
         def start_command(message):
             if message.chat.id == config.MY_USER_ID:
-                # function.login_user()
+                function.login_user()
                 self.bot.send_message(message.from_user.id, f'👋 Привет, {message.from_user.first_name}!'
                                                             f'\nПоделись со мной фото или видео и я загружу их '
                                                             f'в твой инстаграм!')
 
                 @self.bot.message_handler(commands=['ping'])
-                def ping(ping_message):
+                def send_welcome(ping_message):
                     self.bot.send_message(ping_message.from_user.id, 'Я тут')
+
+                @self.bot.message_handler(content_types=['audio', 'voice', 'document', 'text', 'location', 'contact',
+                                                         'sticker', 'video_note'])
+                def others(types_message):
+                    if types_message.content_type == 'voice':
+                        self.bot.send_message(types_message.chat.id, 'Ну все, ты огребаешь!')
+                        self.bot.send_sticker(types_message.chat.id, 'CAACAgIAAxkBAAEKcaplHG8ULx1nbcG6DDvnJyIqxX'
+                                                                     '-iFQAC5hMAAi8iyEvZrfyv1izExzAE')
+                    elif types_message.content_type == 'audio':
+                        self.bot.send_message(types_message.chat.id, 'Ну и херню же ты слушаешь')
+                    elif types_message.content_type == 'document':
+                        self.bot.send_message(types_message.chat.id, 'Ты где это взял?')
+                    elif types_message.content_type == 'text':
+                        self.bot.send_message(types_message.chat.id, 'Ну ты ваще')
+                    elif types_message.content_type == 'location':
+                        self.bot.send_message(types_message.chat.id, 'Опять где-то шляешься!')
+                    elif types_message.content_type == 'contact':
+                        self.bot.send_message(types_message.chat.id, 'Кореш твой?')
+                    elif types_message.content_type == 'sticker':
+                        self.bot.send_sticker(types_message.chat.id, 'CAACAgIAAxkBAAEKcahlHGuJCzjjAtM'
+                                                                     'EpdK5ayCoL6NAnQACJhoAApmoyEtA7xJ_hrc3ajAE')
+                    elif types_message.content_type == 'video_note':
+                        self.bot.send_sticker(types_message.chat.id, 'CAACAgIAAxkBAAEKcahlHGuJCzjjAtM'
+                                                                     'EpdK5ayCoL6NAnQACJhoAApmoyEtA7xJ_hrc3ajAE')
 
                 @self.bot.message_handler(content_types=['photo'])
                 def photo(photo_message):
@@ -50,24 +76,28 @@ class PostingBot:
                 def photo_text(photo_text_message):
 
                     if photo_text_message.text == 'Выложить фото в ленту':
+                        self.bot.send_photo('-1001660390862', self.fileid)
                         status = function.photo_upload_feed()
                         if status == 'OK':
-                            self.bot.reply_to(photo_text_message, 'Запостил')
+                            self.bot.send_message(photo_text_message.from_user.id, 'Запостил', reply_markup=r)
                         else:
-                            self.bot.reply_to(photo_text_message, 'Что-то пошло не так.')
+                            self.bot.send_message(photo_text_message.from_user.id,
+                                                  'Что-то пошло не так.', reply_markup=r)
 
-                    if photo_text_message.text == 'Выложить фото в сторис':
+                    elif photo_text_message.text == 'Выложить фото в сторис':
+                        self.bot.send_photo('-1001660390862', self.fileid)
                         status = function.photo_upload_story()
                         if status == 'OK':
-                            self.bot.reply_to(photo_text_message, 'Запостил')
+                            self.bot.send_message(photo_text_message.from_user.id, 'Запостил', reply_markup=r)
                         else:
-                            self.bot.reply_to(photo_text_message, 'Что-то пошло не так.')
+                            self.bot.send_message(photo_text_message.from_user.id,
+                                                  'Что-то пошло не так.', reply_markup=r)
 
-                    if photo_text_message.text == 'Сохранить в хранилище':
+                    elif photo_text_message.text == 'Сохранить в хранилище':
                         src = f'Download/Photo/' + str(photo_text_message.date) + '.jpg'
                         with open(src, 'wb') as new_file:
                             new_file.write(self.downloaded_file)
-                        self.bot.reply_to(photo_text_message, 'Сохранил')
+                        self.bot.send_message(photo_text_message.from_user.id, 'Сохранил', reply_markup=r)
 
                 @self.bot.message_handler(content_types=['video'])
                 def video(video_message):
@@ -91,26 +121,32 @@ class PostingBot:
                 def video_text(video_text_message):
 
                     if video_text_message.text == 'Выложить видео в ленту':
+                        self.bot.send_video('-1001660390862', self.fileid)
                         status = function.video_upload_feed()
                         if status == 'OK':
-                            self.bot.reply_to(video_text_message, 'Запостил.')
+                            self.bot.send_message(video_text_message.from_user.id, 'Запостил.', reply_markup=r)
                         else:
-                            self.bot.reply_to(video_text_message, 'Что-то пошло не так.'
-                                                                  '\nВозможно, видео слишком длинное.')
+                            self.bot.send_message(video_text_message.from_user.id,
+                                                  'Что-то пошло не так.'
+                                                  '\nВозможно, видео слишком длинное.',
+                                                  reply_markup=r)
 
-                    if video_text_message.text == 'Выложить видео в сторис':
+                    elif video_text_message.text == 'Выложить видео в сторис':
+                        self.bot.send_video('-1001660390862', self.fileid)
                         status = function.video_upload_story()
                         if status == 'OK':
-                            self.bot.reply_to(video_text_message, 'Запостил.')
+                            self.bot.send_message(video_text_message.from_user.id, 'Запостил.', reply_markup=r)
                         else:
-                            self.bot.reply_to(video_text_message, 'Что-то пошло не так.'
-                                                                  '\nВозможно, видео слишком длинное.')
+                            self.bot.send_message(video_text_message.from_user.id,
+                                                  'Что-то пошло не так.'
+                                                  '\nВозможно, видео слишком длинное.',
+                                                  reply_markup=r)
 
-                    if video_text_message.text == 'Сохранить в хранилище':
+                    elif video_text_message.text == 'Сохранить в хранилище':
                         src = f'Download/Video/' + str(video_text_message.date) + '.mp4'
                         with open(src, 'wb') as new_file:
                             new_file.write(self.downloaded_file)
-                        self.bot.reply_to(video_text_message, 'Сохранил')
+                        self.bot.send_message(video_text_message.from_user.id, 'Сохранил', reply_markup=r)
 
             else:
                 self.bot.reply_to(message, 'Сорян, этот бот приватный!')
