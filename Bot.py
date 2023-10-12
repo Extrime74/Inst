@@ -76,7 +76,7 @@ class PostingBot:
                 def photo_text(photo_text_message):
 
                     if photo_text_message.text == 'Выложить фото в ленту':
-                        self.bot.send_photo('-1001660390862', self.fileid)
+                        self.bot.send_photo('YOUR_TG_CHAT_ID', self.fileid)
                         status = function.photo_upload_feed()
                         if status == 'OK':
                             self.bot.send_message(photo_text_message.from_user.id, 'Запостил', reply_markup=r)
@@ -85,7 +85,7 @@ class PostingBot:
                                                   'Что-то пошло не так.', reply_markup=r)
 
                     elif photo_text_message.text == 'Выложить фото в сторис':
-                        self.bot.send_photo('-1001660390862', self.fileid)
+                        self.bot.send_photo('YOUR_TG_CHAT_ID', self.fileid)
                         status = function.photo_upload_story()
                         if status == 'OK':
                             self.bot.send_message(photo_text_message.from_user.id, 'Запостил', reply_markup=r)
@@ -121,7 +121,7 @@ class PostingBot:
                 def video_text(video_text_message):
 
                     if video_text_message.text == 'Выложить видео в ленту':
-                        self.bot.send_video('-1001660390862', self.fileid)
+                        self.bot.send_video('YOUR_TG_CHAT_ID', self.fileid)
                         status = function.video_upload_feed()
                         if status == 'OK':
                             self.bot.send_message(video_text_message.from_user.id, 'Запостил.', reply_markup=r)
@@ -132,7 +132,7 @@ class PostingBot:
                                                   reply_markup=r)
 
                     elif video_text_message.text == 'Выложить видео в сторис':
-                        self.bot.send_video('-1001660390862', self.fileid)
+                        self.bot.send_video('YOUR_TG_CHAT_ID', self.fileid)
                         status = function.video_upload_story()
                         if status == 'OK':
                             self.bot.send_message(video_text_message.from_user.id, 'Запостил.', reply_markup=r)
