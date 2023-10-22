@@ -7,12 +7,11 @@ import config
 import os
 
 
-# cl = Client(proxy=config.PROXY)
 cl = Client()
 logger = logging.getLogger()
 
 
-def login_user():
+def login_user():    # взято из официальной документации instagrapi
     session = cl.load_settings('session.json')
     login_via_session = False
     login_via_pw = False
@@ -52,88 +51,56 @@ def login_user():
 
     if not login_via_pw and not login_via_session:
         print("Couldn't login user with either password or session")
-        raise Exception("Couldn't login user with either password or session")
-
-
-# def session_login():
-#     cl.load_settings('session.json')
-#     cl.login(config.USERNAME, config.PASSWORD)
-#     cl.get_timeline_feed()  # check session
-# def inst_login():
-#     login_user()
-#     cl.delay_range = [1, 4]
-#     cl.get_timeline_feed()
-#     name = cl.account_info().full_name
-#     print(f'Добро пожаловать в аккаунт "{name}"')
+        raise Exception("Couldn't login user with either password or session") ##
 
 def photo_cleanup():
     try:
         os.remove('image.jpg')
     except FileNotFoundError:
         pass
+
 def video_cleanup():
     try:
         os.remove('video.mp4')
     except FileNotFoundError:
         pass
+
 def photo_upload_feed():
     try:
         cl.photo_upload('image.jpg', caption='')
         cl.get_timeline_feed()
         print('Фото загружено в ленту')
         return 'OK'
-    except UnknownError:
-        cl.get_timeline_feed()
-        print('Что-то пошло не так')
+    except Exception as e:
+        print(f'Что-то пошло не так, {e}')
         pass
+
 def photo_upload_story():
     try:
         cl.photo_upload_to_story('image.jpg', caption='')
         cl.get_timeline_feed()
         print('Фото загружено в сторис')
         return 'OK'
-    except UnknownError:
-        cl.get_timeline_feed()
-        print('Что-то пошло не так')
+    except Exception as e:
+        print(f'Что-то пошло не так, {e}')
         pass
+
 def video_upload_feed():
     try:
         cl.video_upload('video.mp4', caption='')
         cl.get_timeline_feed()
         print('Видео загружено в ленту')
         return 'OK'
-    except UnknownError:
-        cl.get_timeline_feed()
-        print('Что-то пошло не так')
+    except Exception as e:
+        print(f'Что-то пошло не так, {e}')
         pass
+
 def video_upload_story():
     try:
         cl.video_upload_to_story('video.mp4', caption='')
         cl.get_timeline_feed()
         print('Видео загружено в сторис')
         return 'OK'
-    except UnknownError:
-        cl.get_timeline_feed()
-        print('Что-то пошло не так')
+    except Exception as e:
+        print(f'Что-то пошло не так, {e}')
         pass
-
-# def get_current_time():
-#     t = time.localtime()
-#     current_time = time.strftime('%H:%M:%S', t)
-#     print(current_time)
-#     return current_time
-
-def wait_for_time(self):
-    while True:
-        current_time = self.get.current_time()
-        time_list = ['8:00:00', '12:00:00', '16:00:00', '20:00:00']
-        if current_time in time_list:
-            print('Ok')
-            continue
-        else:
-            pass
-
-def refresh():
-    cl.get_timeline_feed()
-    Timer(400, refresh).start()
-    print('Обновлено')

@@ -1,5 +1,4 @@
-TOKEN = 'your_tg_token'
-USERNAME = 'your_ig_login'
-PASSWORD = 'your_ig_password'
-MY_USER_ID = your_tg_id
-PROXY = "socks5://username:password@ip:port"
+TOKEN = 'PUT_YOUR_TG_TOKEN_HERE'
+USERNAME = 'PUT_YOUR_IG_USERNAME_HERE'
+PASSWORD = 'PUT_YOUR_IG_PASSWORD_HERE'
+MY_USER_ID = PUT_YOUR_TG_ID_HERE
