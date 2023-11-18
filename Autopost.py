@@ -1,14 +1,65 @@
 import random
 import time
-import function
 from instagrapi import Client
 import os
+from instagrapi.exceptions import LoginRequired
 import config
 import telebot
+import datetime
+import logging
 
 cl = Client()
-function.login_user()
-print('Погнали!')
+logger = logging.getLogger()
+current_date = datetime.datetime.now()
+date = current_date.strftime('%d.%m.%y %H:%M')
+
+
+def login_autopost():
+    session = cl.load_settings('session_autopost.json')
+    login_via_session = False
+    login_via_pw = False
+
+    if session:
+        try:
+            cl.set_settings(session)
+            cl.login(config.USERNAME, config.PASSWORD)
+
+            # check if session is valid
+            try:
+                cl.get_timeline_feed()
+                print("####", date, "####", "\nСессия активна\n")
+            except LoginRequired:
+                logger.info('Session is invalid, need to login via username and password')
+                print('Session is invalid, need to login via username and password')
+                old_session = cl.get_settings()
+
+                # use the same device uuids across logins
+                cl.set_settings({})
+                cl.set_uuids(old_session['uuids'])
+                cl.login(config.USERNAME, config.PASSWORD)
+            login_via_session = True
+        except Exception as e:
+            logger.info("Couldn't login user using session information: %s" % e)
+            print("Couldn't login user using session information: %s" % e)
+
+    if not login_via_session:
+        try:
+            logger.info('Attempting to login via username and password. username: %s' % config.USERNAME)
+            print('Attempting to login via username and password. username: %s' % config.USERNAME)
+            if cl.login(config.USERNAME, config.PASSWORD):
+                login_via_pw = True
+        except Exception as e:
+            logger.info("Couldn't login user using username and password: %s" % e)
+            print("Couldn't login user using username and password: %s" % e)
+
+    if not login_via_pw and not login_via_session:
+        print("Couldn't login user with either password or session")
+        raise Exception("Couldn't login user with either password or session")
+
+
+login_autopost()
+print("####", date, "####", "\nАвтопостинг запущен\n")
+
 
 class MakePost:
     def __init__(self, client):
@@ -33,42 +84,51 @@ class MakePost:
 
             if current_time in photo_feed_list:
                 try:
-                    pic = str("Download/Photo/")+(random.choice(os.listdir("Download/Photo/")))
+                    pic = str("Download/Photo/") + (random.choice(os.listdir("Download/Photo/")))
                     time.sleep(2)
                     cl.photo_upload(caption='', path=pic)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', 'Запостил фото в ленту')
                     print(current_time, 'Запостил фото в ленту', pic)
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', 'Запостил фото в ленту')
+                    time.sleep(2)
                     os.remove(pic)
                 except Exception as e:
                     print(current_time, e)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', f'Что-то пошло не так. {e}')
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', e)
                     pass
 
             elif current_time in photo_stories_list:
                 try:
-                    pic = str("Download/Photo/")+(random.choice(os.listdir("Download/Photo/")))
+                    pic = str("Download/Photo/") + (random.choice(os.listdir("Download/Photo/")))
                     time.sleep(2)
                     cl.photo_upload_to_story(caption='', path=pic)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', 'Запостил фото в сторис')
                     print(current_time, 'Запостил фото в сторис', pic)
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', 'Запостил фото в сторис')
+                    time.sleep(2)
                     os.remove(pic)
                 except Exception as e:
                     print(current_time, e)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', f'Что-то пошло не так. {e}')
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', e)
                     pass
 
             elif current_time in video_feed_list:
                 try:
-                    video = str("Download/Video/")+(random.choice(os.listdir("Download/Video/")))
+                    video = str("Download/Video/") + (random.choice(os.listdir("Download/Video/")))
                     time.sleep(2)
                     cl.video_upload(caption='', path=video)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', 'Запостил видео в ленту')
                     print(current_time, 'Запостил видео в ленту', video)
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', 'Запостил видео в ленту')
+                    time.sleep(2)
                     os.remove(video)
                     os.remove(video + '.jpg')
                 except Exception as e:
                     print(current_time, e)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', f'Что-то пошло не так. {e}')
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', e)
                     pass
 
             elif current_time in video_stories_list:
@@ -76,13 +136,16 @@ class MakePost:
                     video = str("Download/Video/") + (random.choice(os.listdir("Download/Video/")))
                     time.sleep(2)
                     cl.video_upload_to_story(caption='', path=video)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', 'Запостил видео в сторис')
                     print(current_time, 'Запостил видео в сторис', video)
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', 'Запостил видео в сторис')
+                    time.sleep(2)
                     os.remove(video)
                     os.remove(video + '.jpg')
                 except Exception as e:
                     print(current_time, e)
-                    self.bot.send_message('PUT_YOUR_TG_ID_HERE', f'Что-то пошло не так. {e}')
+                    time.sleep(2)
+                    self.bot.send_message('PUT_YOUR_TG_CHAT_ID_HERE', e)
                     pass
 
 
